@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/dracula.min.css" rel="stylesheet">
+    <style>
+        .gate-palette {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .gate-item {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            margin: 5px;
+            background-color: #e7f1ff;
+            font-weight: bold;
+            cursor: grab;
+        }
+        
+        .gate-item.control {
+            background-color: #343a40;
+            color: white;
+        }
+        
+        .gate-item.target {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .gate-item.measure {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .circuit-grid {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            min-height: 300px;
+        }
+        
+        .qubit-line {
+            position: relative;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .qubit-label {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .qubit-wire {
+            position: absolute;
+            left: 60px;
+            right: 10px;
+            top: 50%;
+            height: 2px;
+            background-color: #343a40;
+        }
+        
+        .gate-slot {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 1px dashed #dee2e6;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .gate-slot.active {
+            border: 2px solid #28a745;
+        }
+        
+        .gate-slot.occupied {
+            border: none;
+        }
+        
+        .gate-on-wire {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            background-color: #e7f1ff;
+            font-weight: bold;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        
+        .gate-on-wire.control {
+            background-color: #343a40;
+            color: white;
+        }
+        
+        .gate-on-wire.target {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .gate-on-wire.measure {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .control-line {
+            position: absolute;
+            width: 2px;
+            background-color: #343a40;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/ui">Qmulator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/simulator">模拟器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/circuit">电路可视化</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/ui/circuit_designer">电路设计器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/examples">示例代码</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>量子电路设计器</h1>
+        <p class="lead">拖放量子门来设计电路，自动生成QASM代码</p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">电路设计</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="gate-palette mb-3">
+                            <h6>量子门</h6>
+                            <div class="gate-item" data-gate="h" draggable="true">H</div>
+                            <div class="gate-item" data-gate="x" draggable="true">X</div>
+                            <div class="gate-item" data-gate="y" draggable="true">Y</div>
+                            <div class="gate-item" data-gate="z" draggable="true">Z</div>
+                            <div class="gate-item" data-gate="s" draggable="true">S</div>
+                            <div class="gate-item" data-gate="t" draggable="true">T</div>
+                            <div class="gate-item target" data-gate="cx" data-control="true" draggable="true">CX</div>
+                            <div class="gate-item target" data-gate="cz" data-control="true" draggable="true">CZ</div>
+                            <div class="gate-item target" data-gate="swap" data-two-target="true" draggable="true">SW</div>
+                            <div class="gate-item measure" data-gate="measure" draggable="true">M</div>
+                            <div class="gate-item" data-gate="rx" data-param="true" draggable="true">RX</div>
+                            <div class="gate-item" data-gate="ry" data-param="true" draggable="true">RY</div>
+                            <div class="gate-item" data-gate="rz" data-param="true" draggable="true">RZ</div>
+                            <div class="gate-item target" data-gate="cu1" data-control="true" data-param="true" draggable="true">CU1</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-3">
+                            <div>
+                                <button id="addQubitBtn" class="btn btn-sm btn-primary">添加量子比特</button>
+                                <button id="removeQubitBtn" class="btn btn-sm btn-danger">移除量子比特</button>
+                            </div>
+                            <div>
+                                <button id="clearCircuitBtn" class="btn btn-sm btn-warning">清空电路</button>
+                            </div>
+                        </div>
+                        
+                        <div id="circuitGrid" class="circuit-grid">
+                            <!-- 量子比特线将在这里动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">QASM代码</h5>
+                        <div>
+                            <select id="qasmVersion" class="form-select form-select-sm">
+                                <option value="2.0" selected>QASM 2.0</option>
+                                <option value="1.0">QASM 1.0</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="qasmEditor" class="form-control"></textarea>
+                    </div>
+                    <div class="card-footer">
+                        <button id="copyCodeBtn" class="btn btn-secondary">复制代码</button>
+                        <button id="runCodeBtn" class="btn btn-primary">运行代码</button>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">参数设置</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="gateParams">
+                            <!-- 门参数设置将在这里动态生成 -->
+                            <div class="text-center text-muted">
+                                <p>选择带参数的门以设置参数</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>Qmulator - QASM量子汇编模拟器 &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js"></script>
+    <script src="/assets/js/circuit_designer.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .title }}</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/ui">Qmulator</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/simulator">模拟器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/ui/circuit">电路可视化</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/circuit_designer">电路设计器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ui/examples">示例代码</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>量子电路详情</h1>
+        <p class="lead">电路ID: {{ .circuitID }}</p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">电路可视化</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="circuitVisualization" class="circuit-visualization">
+                            <!-- 电路可视化内容将在这里动态生成 -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">加载中...</span>
+                                </div>
+                                <p class="mt-3">正在加载电路数据...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">电路信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="circuitInfo">
+                            <!-- 电路信息将在这里动态生成 -->
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    量子比特数量
+                                    <span id="qubitCount" class="badge bg-primary rounded-pill">-</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    经典比特数量
+                                    <span id="bitCount" class="badge bg-primary rounded-pill">-</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    门操作数量
+                                    <span id="gateCount" class="badge bg-primary rounded-pill">-</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">QASM代码</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre id="qasmCode" class="bg-light p-3 rounded"><code>// 加载中...</code></pre>
+                    </div>
+                    <div class="card-footer">
+                        <button id="copyCodeBtn" class="btn btn-secondary">复制代码</button>
+                        <button id="runCodeBtn" class="btn btn-primary">运行代码</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>Qmulator - QASM量子汇编模拟器 &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取电路ID
+            const circuitID = "{{ .circuitID }}";
+            
+            // 加载电路数据
+            fetchCircuitData(circuitID);
+            
+            // 复制代码按钮
+            document.getElementById('copyCodeBtn').addEventListener('click', function() {
+                const code = document.querySelector('#qasmCode code').textContent;
+                navigator.clipboard.writeText(code)
+                    .then(() => {
+                        alert('代码已复制到剪贴板！');
+                    })
+                    .catch(err => {
+                        console.error('复制失败: ', err);
+                        alert('复制失败，请手动选择代码并复制。');
+                    });
+            });
+            
+            // 运行代码按钮
+            document.getElementById('runCodeBtn').addEventListener('click', function() {
+                const code = document.querySelector('#qasmCode code').textContent;
+                // 将代码存储到localStorage
+                localStorage.setItem('qasmCode', code);
+                localStorage.setItem('qasmVersion', '2.0'); // 默认使用QASM 2.0
+                
+                // 跳转到模拟器页面
+                window.location.href = '/ui/simulator?from=circuit_detail';
+            });
+        });
+        
+        // 获取电路数据
+        function fetchCircuitData(circuitID) {
+            // 这里应该是向后端API请求特定电路的数据
+            // 在实际应用中，这里应该是一个真实的API调用
+            // 为了演示，我们使用模拟数据
+            
+            // 模拟API请求延迟
+            setTimeout(() => {
+                // 模拟数据
+                const circuitData = {
+                    qubits: 3,
+                    bits: 3,
+                    gates: [
+                        { name: 'h', targets: [0], controls: [], position: 0 },
+                        { name: 'cx', targets: [1], controls: [0], position: 1 },
+                        { name: 'measure', targets: [0, 1, 2], controls: [], position: 2 }
+                    ],
+                    qasmCode: `OPENQASM 2.0;
+include "qelib1.inc";
+
+qreg q[3];
+creg c[3];
+
+h q[0];
+cx q[0], q[1];
+measure q -> c;`
+                };
+                
+                // 更新UI
+                updateCircuitInfo(circuitData);
+                renderCircuitVisualization(circuitData);
+                updateQasmCode(circuitData.qasmCode);
+            }, 1000);
+        }
+        
+        // 更新电路信息
+        function updateCircuitInfo(data) {
+            document.getElementById('qubitCount').textContent = data.qubits;
+            document.getElementById('bitCount').textContent = data.bits;
+            document.getElementById('gateCount').textContent = data.gates.length;
+        }
+        
+        // 渲染电路可视化
+        function renderCircuitVisualization(data) {
+            const visualization = document.getElementById('circuitVisualization');
+            
+            // 清空加载指示器
+            visualization.innerHTML = '';
+            
+            // 创建电路可视化
+            // 这里应该是实际的电路可视化逻辑
+            // 为了演示，我们使用简单的HTML表示
+            
+            const circuitContainer = document.createElement('div');
+            circuitContainer.className = 'circuit-container';
+            
+            // 创建量子比特线
+            for (let i = 0; i < data.qubits; i++) {
+                const qubitLine = document.createElement('div');
+                qubitLine.className = 'qubit-line d-flex align-items-center mb-3';
+                
+                // 添加量子比特标签
+                const qubitLabel = document.createElement('div');
+                qubitLabel.className = 'qubit-label me-3';
+                qubitLabel.textContent = `q[${i}]`;
+                qubitLine.appendChild(qubitLabel);
+                
+                // 添加量子线
+                const qubitWire = document.createElement('div');
+                qubitWire.className = 'qubit-wire flex-grow-1';
+                qubitWire.style.height = '2px';
+                qubitWire.style.backgroundColor = '#343a40';
+                qubitLine.appendChild(qubitWire);
+                
+                circuitContainer.appendChild(qubitLine);
+            }
+            
+            visualization.appendChild(circuitContainer);
+        }
+        
+        // 更新QASM代码
+        function updateQasmCode(code) {
+            document.querySelector('#qasmCode code').textContent = code;
+        }
+    </script>
+</body>
+</html>

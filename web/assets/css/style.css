@@ -1,0 +1,190 @@
+/* 全局样式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* 代码编辑器样式 */
+.CodeMirror {
+    height: 300px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 电路可视化容器 */
+.circuit-container {
+    min-height: 200px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+/* 结果容器 */
+.results-container {
+    min-height: 200px;
+}
+
+/* 状态演化容器 */
+.state-container {
+    min-height: 200px;
+}
+
+/* 描述容器 */
+.description-container {
+    min-height: 150px;
+}
+
+/* 量子门样式 */
+.quantum-gate {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    margin: 2px;
+    background-color: #e7f1ff;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    z-index: 5;
+    cursor: pointer;
+}
+
+/* 控制点样式 */
+.quantum-gate.control {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 50%;
+    background-color: #343a40;
+    color: white;
+    border: none;
+    margin-top: 5px;
+}
+
+/* 目标门样式 */
+.quantum-gate.target {
+    min-width: 30px;
+    width: auto;
+    padding: 0 5px;
+    background-color: #007bff;
+    color: white;
+}
+
+/* 测量门样式 */
+.quantum-gate.measure {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 控制线样式 */
+.control-line {
+    position: absolute;
+    background-color: #007bff;
+    z-index: 2;
+}
+
+/* 电路表格容器 */
+.circuit-table {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* 激活的量子门样式 */
+.quantum-gate.active-gate {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+    z-index: 10;
+    animation: pulse-gate 1s infinite;
+}
+
+@keyframes pulse-gate {
+    0% {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.9);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.7);
+    }
+}
+
+/* 量子线样式 */
+.quantum-wire {
+    height: 2px;
+    background-color: #343a40;
+    margin: 15px 0;
+}
+
+/* 结果显示样式 */
+.result-bar {
+    height: 30px;
+    background-color: #007bff;
+    margin-bottom: 5px;
+    color: white;
+    text-align: right;
+    padding-right: 10px;
+    line-height: 30px;
+    border-radius: 4px;
+}
+
+/* 步骤执行样式 */
+.step-highlight {
+    background-color: #ffc107;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 动画控制面板样式 */
+#animationControls {
+    transition: all 0.3s ease;
+}
+
+#animationControls.d-none {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+#animationControls:not(.d-none) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animation-status {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 8px;
+    border: 1px solid #eee;
+}
+
+.animation-status .badge {
+    font-size: 0.9rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .CodeMirror {
+        height: 200px;
+    }
+    
+    .circuit-container, 
+    .results-container, 
+    .state-container, 
+    .description-container {
+        min-height: 150px;
+    }
+}
