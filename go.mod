@@ -1,4 +1,4 @@
-module github.com/d-robotics/qmulator
+module github.com/eust-w/qmulator
 
 go 1.16
 

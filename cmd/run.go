@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/d-robotics/qmulator/pkg/parser"
-	"github.com/d-robotics/qmulator/pkg/simulator"
+	"github.com/eust-w/qmulator/pkg/parser"
+	"github.com/eust-w/qmulator/pkg/simulator"
 	"github.com/spf13/cobra"
 )
 
 var (
-	runFile    string
+	runFile     string
 	qasmVersion string
 )
 
@@ -59,6 +59,9 @@ var runCmd = &cobra.Command{
 
 		// 打印结果
 		fmt.Println(sim.FormatResult(result))
+		if len(result.Errors) > 0 {
+			os.Exit(1)
+		}
 	},
 }
 

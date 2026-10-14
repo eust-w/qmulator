@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/d-robotics/qmulator/pkg/parser"
+	"github.com/eust-w/qmulator/pkg/parser"
 	"github.com/gin-gonic/gin"
 )
 

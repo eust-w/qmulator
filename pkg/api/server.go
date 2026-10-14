@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/d-robotics/qmulator/pkg/parser"
-	"github.com/d-robotics/qmulator/pkg/simulator"
+	"github.com/eust-w/qmulator/pkg/parser"
+	"github.com/eust-w/qmulator/pkg/simulator"
 	"github.com/gin-gonic/gin"
 )
 

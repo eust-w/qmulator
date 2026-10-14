@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/d-robotics/qmulator/pkg/parser"
+	"github.com/eust-w/qmulator/pkg/parser"
 )
 
 // SimulationResult 表示模拟结果

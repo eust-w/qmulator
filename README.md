@@ -1,57 +1,78 @@
-# Qmulator - QASM量子汇编模拟器
+<div align="center">
+  <img src="docs/readme/hero.svg" width="100%" alt="Qmulator workflow overview">
+  <h1>Qmulator</h1>
+  <p><strong>用轻量教学原型探索 QASM 程序与电路。</strong></p>
+  <p><a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-d99536?style=flat-square"></a> <a href="docs/readme/validation.md"><img alt="Validation notes" src="https://img.shields.io/badge/Validation-repository%20checks-547ac4?style=flat-square"></a></p>
+  <p><a href="#overview">项目亮点</a> · <a href="#quick-start">快速开始</a> · <a href="#workflow">工作流</a> · <a href="#validation">验证</a> · <a href="#documentation">文档</a></p>
+  <p><a href="README.en.md">English</a> · <a href="README.md">简体中文</a></p>
+</div>
 
-Qmulator是一个基于Go语言的QASM量子汇编模拟器，支持QASM 1.0和QASM 2.0标准。该项目使用Cobra实现命令行功能，使用Gin框架提供REST API接口。
+---
 
-## 功能特点
+<a id="overview"></a>
+## 项目亮点
 
-- 支持QASM 1.0和QASM 2.0语法解析
-- 模拟执行量子电路
-- 命令行界面支持直接执行QASM文件
-- REST API接口支持远程调用
-- 可视化量子电路执行结果
+Go QASM 解析器、CLI 与 Web 教学界面。当前模拟器采用独立量子位表示，并非完整联合态量子引擎。
 
-## 安装
+| 能力 | 内容 |
+| :--- | :--- |
+| **QASM 探索** | 解析器与示例程序，用于查看已实现语法。 |
+| **CLI / API** | 运行文件或查看本地 HTTP 接口。 |
+| **电路界面** | 浏览器电路示例与可视化。 |
 
-确保您已安装Go 1.16或更高版本，然后运行：
+### 本地页面
+
+![qmulator local UI](docs/readme/demo.jpg)
+
+<a id="quick-start"></a>
+## 快速开始
 
 ```bash
-go get github.com/d-robotics/qmulator
+git clone https://github.com/eust-w/qmulator.git
+cd qmulator
+go mod download
+go build -o qmulator .
+./qmulator run -f examples/bell_state.qasm
+./qmulator serve --port 8080 --ui
+# Open http://127.0.0.1:8080/ui
 ```
 
-## 使用方法
+<a id="workflow"></a>
+## 工作流
 
-### 命令行使用
+```text
+PARSE → EXECUTE → INSPECT
+```
 
 ```bash
-# 运行QASM文件
-qmulator run -f path/to/file.qasm
-
-# 指定QASM版本
-qmulator run -f path/to/file.qasm --version 2.0
-
-# 启动API服务器
-qmulator serve --port 8080
+go test ./...
+go build .
 ```
 
-### API使用
+<a id="validation"></a>
+## 验证
 
-启动服务器后，可以通过以下API端点访问：
-
-- `POST /api/v1/run` - 运行QASM代码
-- `GET /api/v1/status` - 检查服务器状态
-
-## 项目结构
-
-```
-.
-├── cmd/           # 命令行应用程序
-├── pkg/           # 核心包
-│   ├── simulator/ # 量子模拟器实现
-│   ├── parser/    # QASM解析器
-│   └── api/       # REST API实现
-└── examples/      # QASM示例文件
+```bash
+go test ./...
+go build .
+go run . run -f examples/bell_state.qasm
 ```
 
-## 许可证
+运行环境与已执行结果见 [validation notes](docs/readme/validation.md).
 
-MIT
+| 项目 | 当前边界 |
+| :--- | :--- |
+| 状态模型 | 独立 Alpha/Beta 量子位无法忠实表达一般纠缠联合态。 |
+| 示例 | Bell 示例验证解析与执行链路，不证明纠缠模拟正确。 |
+| 兼容性 | 部分解析构造不代表完整 QASM 标准兼容。 |
+
+<a id="documentation"></a>
+## 文档
+
+- [Parser / 解析器](pkg/parser/)
+- [Simulator / 模拟器](pkg/simulator/simulator.go)
+- [Examples / 示例](examples/)
+
+## 许可证与来源
+
+原创代码和新增演示资源采用 [MIT](LICENSE). 第三方代码、模型、数据和外部资源保留各自许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

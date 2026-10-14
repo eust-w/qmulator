@@ -33,38 +33,35 @@ func ParseGateDefinition(lines []string) (*GateDefStatement, int, error) {
 		return nil, 0, fmt.Errorf("empty gate definition")
 	}
 
-	// 解析门定义头部
-	headerLine := lines[0]
-	def, err := parseGateHeader(headerLine)
+	cleaned := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if at := strings.Index(line, "//"); at >= 0 {
+			line = line[:at]
+		}
+		cleaned = append(cleaned, line)
+	}
+	source := strings.Join(cleaned, "\n")
+	open := strings.Index(source, "{")
+	close := strings.LastIndex(source, "}")
+	if open < 0 || close <= open {
+		return nil, 0, fmt.Errorf("unclosed gate definition")
+	}
+	def, err := parseGateHeader(source[:open])
 	if err != nil {
 		return nil, 0, err
 	}
-
-	// 查找门定义体
-	bodyStart := 1
-	bodyEnd := -1
-	for i := bodyStart; i < len(lines); i++ {
-		line := strings.TrimSpace(lines[i])
-		if line == "}" {
-			bodyEnd = i
-			break
+	var body []string
+	for _, statement := range strings.Split(source[open+1:close], ";") {
+		if statement = strings.TrimSpace(statement); statement != "" {
+			body = append(body, statement+";")
 		}
 	}
-
-	if bodyEnd == -1 {
-		return nil, 0, fmt.Errorf("unclosed gate definition")
-	}
-
-	// 解析门定义体
-	body := lines[bodyStart:bodyEnd]
 	statements, err := parseGateBody(body, def)
 	if err != nil {
 		return nil, 0, err
 	}
-
 	def.Body = statements
-
-	return &GateDefStatement{Definition: def}, bodyEnd + 1, nil
+	return &GateDefStatement{Definition: def}, len(lines), nil
 }
 
 // parseGateHeader 解析门定义头部
@@ -248,7 +245,7 @@ func parseCXGate(line string, def *GateDefinition) (*GateStatement, error) {
 // parseCustomGateCall 解析自定义门调用
 func parseCustomGateCall(line string, def *GateDefinition) (*GateStatement, error) {
 	// 匹配带参数的门调用: name(param1,param2,...) qubit1,qubit2,...
-	reWithParams := regexp.MustCompile(`([a-zA-Z][a-zA-Z0-9]*)\s*\(([^)]*)\)\s+(.+)`)
+	reWithParams := regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9]*)\s*\((.*)\)\s+(.+)$`)
 	matches := reWithParams.FindStringSubmatch(line)
 	if len(matches) == 4 {
 		gateName := matches[1]

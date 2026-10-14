@@ -1,6 +1,6 @@
 package main
 
-import "github.com/d-robotics/qmulator/cmd"
+import "github.com/eust-w/qmulator/cmd"
 
 func main() {
 	cmd.Execute()

@@ -37,13 +37,13 @@ func (p *Parser) Parse(reader io.Reader) (*ParseResult, error) {
 
 	lineNum := 0
 	var errors []error
-	
+
 	// 收集所有行以支持多行门定义
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	
+
 	// 处理所有行
 	for i := 0; i < len(lines); i++ {
 		lineNum = i + 1
@@ -81,29 +81,29 @@ func (p *Parser) Parse(reader io.Reader) (*ParseResult, error) {
 			program.Includes = append(program.Includes, include)
 			continue
 		}
-		
+
 		// 检查是否是门定义
 		if strings.HasPrefix(line, "gate") && strings.Contains(line, "{") {
 			// 收集门定义的所有行
 			var gateDefLines []string
 			gateDefLines = append(gateDefLines, line)
-			
+
 			// 查找门定义的结束
-			braceCount := 1 // 已经遇到一个左大括号
+			braceCount := strings.Count(line, "{") - strings.Count(line, "}")
 			for j := i + 1; j < len(lines) && braceCount > 0; j++ {
 				nextLine := lines[j]
-				
+
 				// 移除注释
 				if idx := strings.Index(nextLine, "//"); idx >= 0 {
 					nextLine = nextLine[:idx]
 				}
-				
+
 				nextLine = strings.TrimSpace(nextLine)
 				if nextLine == "" {
 					i++
 					continue
 				}
-				
+
 				// 计算大括号
 				for _, c := range nextLine {
 					if c == '{' {
@@ -112,22 +112,22 @@ func (p *Parser) Parse(reader io.Reader) (*ParseResult, error) {
 						braceCount--
 					}
 				}
-				
+
 				gateDefLines = append(gateDefLines, nextLine)
 				i++
-				
+
 				if braceCount == 0 {
 					break
 				}
 			}
-			
+
 			// 解析门定义
 			gateDefStmt, _, err := ParseGateDefinition(gateDefLines)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("line %d: %v", lineNum, err))
 				continue
 			}
-			
+
 			program.Statements = append(program.Statements, gateDefStmt)
 			continue
 		}
@@ -204,47 +204,47 @@ func parseStatement(line string) (Statement, error) {
 	if strings.HasPrefix(line, "measure") {
 		return parseMeasureStatement(line)
 	}
-	
+
 	// 解析U门
 	if strings.HasPrefix(line, "U(") {
 		return parseUGateStatement(line)
 	}
-	
+
 	// 解析CX门
 	if strings.HasPrefix(line, "CX ") {
 		return parseCXGateStatement(line)
 	}
-	
+
 	// 解析CU1门
 	if strings.HasPrefix(line, "cu1(") || strings.HasPrefix(line, "cu1 (") {
 		return parseCU1GateStatement(line)
 	}
-	
+
 	// 解析CU2门
 	if strings.HasPrefix(line, "cu2(") || strings.HasPrefix(line, "cu2 (") {
 		return parseCU2GateStatement(line)
 	}
-	
+
 	// 解析CU3门
 	if strings.HasPrefix(line, "cu3(") || strings.HasPrefix(line, "cu3 (") {
 		return parseCU3GateStatement(line)
 	}
-	
+
 	// 解析CRZ门
 	if strings.HasPrefix(line, "crz(") || strings.HasPrefix(line, "crz (") {
 		return parseCRZGateStatement(line)
 	}
-	
+
 	// 解析SWAP门
 	if strings.HasPrefix(line, "swap ") {
 		return parseSWAPGateStatement(line)
 	}
-	
+
 	// 解析CSWAP门
 	if strings.HasPrefix(line, "cswap ") {
 		return parseCSWAPGateStatement(line)
 	}
-	
+
 	// 解析Fredkin门
 	if strings.HasPrefix(line, "fredkin ") {
 		return parseFredkinGateStatement(line)
@@ -299,7 +299,7 @@ func parseMeasureStatement(line string) (*MeasureStatement, error) {
 	// 支持两种格式：
 	// 1. measure q -> c;
 	// 2. measure q[0] -> c[0];
-	
+
 	// 检查第一种格式
 	re1 := regexp.MustCompile(`measure\s+([a-zA-Z][a-zA-Z0-9]*)\s+->\s+([a-zA-Z][a-zA-Z0-9]*)`)
 	matches := re1.FindStringSubmatch(line)
@@ -369,7 +369,7 @@ func parseGateStatement(line string) (Statement, error) {
 			return parseRotationGate(line, gate)
 		}
 	}
-	
+
 	// 如果不是内置门，尝试解析为自定义门调用
 	return parseCustomGateStatement(line)
 }
